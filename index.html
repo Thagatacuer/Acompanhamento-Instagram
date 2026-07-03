@@ -233,6 +233,8 @@
     color: var(--text);
   }
   .format-badge .n{ color: var(--red); margin-right: 5px; font-family:'Fraunces', serif; }
+  .format-badge.total{ background: var(--red); border-color: var(--red); color: #FBF7F1; }
+  .format-badge.total .n{ color: #FBF7F1; }
 
   .rank-item{
     display:flex;
@@ -397,8 +399,8 @@
 
   async function load(){
     try{
-      const res = await window.storage.get(STORAGE_KEY, false);
-      entries = res && res.value ? JSON.parse(res.value) : [];
+      const raw = localStorage.getItem(STORAGE_KEY);
+      entries = raw ? JSON.parse(raw) : [];
     }catch(err){
       entries = [];
     }
@@ -410,10 +412,10 @@
 
   async function persist(){
     try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(entries), false);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
       return true;
     }catch(err){
-      showStatus('Não consegui salvar agora. Tenta de novo em instantes.', 'err');
+      showStatus('Não consegui salvar agora. O navegador pode estar sem espaço ou em modo privado.', 'err');
       return false;
     }
   }
@@ -731,9 +733,12 @@
     const tipos = ['Reels','Carrossel','Imagem','Story'];
     const counts = {};
     tipos.forEach(t => counts[t] = list.filter(c => c.tipo === t).length);
-    $('contentBreakdown').innerHTML = tipos.map(t =>
-      `<span class="format-badge"><span class="n">${counts[t]}</span>${t}${t!=='Story' && counts[t]!==1 ? 's' : ''}</span>`
-    ).join('') || '<span class="format-badge">Sem conteúdos ainda</span>';
+    const totalBadge = `<span class="format-badge total"><span class="n">${list.length}</span>${list.length===1?'conteúdo no total':'conteúdos no total'}</span>`;
+    $('contentBreakdown').innerHTML = list.length
+      ? totalBadge + tipos.map(t =>
+          `<span class="format-badge"><span class="n">${counts[t]}</span>${t}${t!=='Story' && counts[t]!==1 ? 's' : ''}</span>`
+        ).join('')
+      : '<span class="format-badge">Sem conteúdos ainda</span>';
 
     const ranked = [...list].filter(c => c.tipo !== 'Story').sort((a,b) => scoreOf(b) - scoreOf(a)).slice(0,5);
     $('contentRanking').innerHTML = ranked.length ? ranked.map((c,i) => `
