@@ -680,7 +680,10 @@
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try{
-        const imported = JSON.parse(evt.target.result);
+        let imported = JSON.parse(evt.target.result);
+        if(imported && !Array.isArray(imported) && typeof imported === 'object' && imported.mes){
+          imported = [imported];
+        }
         if(!Array.isArray(imported)) throw new Error('formato inválido');
         const byMes = {};
         entries.forEach(e => byMes[e.mes] = e);
