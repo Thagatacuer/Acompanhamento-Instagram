@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Mensal — Estrada das Cartas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #FBF7F1;
+    --bg-2: #FFFFFF;
+    --surface: #FFFFFF;
+    --surface-2: #F3E7DC;
+    --border: rgba(66,21,22,0.12);
+    --text: #0E1D2A;
+    --text-muted: #8C7A6E;
+    --gold: #9F6B24;
+    --red: #6B1419;
+    --red-dark: #421516;
+    --olive: #44481D;
+    --radius: 14px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    padding: 32px 20px 60px;
+    min-height: 100vh;
+  }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; }
+
+  header.top{
+    display:flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(24px, 4vw, 32px);
+    margin: 0 0 4px;
+    letter-spacing: 0.2px;
+  }
+  header.top p{ margin:0; color: var(--text-muted); font-size: 13.5px; }
+
+  .top-actions{ display:flex; gap:10px; align-items:center; flex-wrap: wrap; }
+
+  select, button, input{
+    font-family: 'Inter', sans-serif;
+  }
+
+  select{
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+  }
+
+  button{
+    cursor:pointer;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: var(--surface);
+    color: var(--text);
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  button:hover{ border-color: rgba(107,20,25,0.45); }
+  button:active{ transform: scale(0.97); }
+  button:focus-visible, select:focus-visible, input:focus-visible{
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+
+  .btn-primary{
+    background: linear-gradient(180deg, var(--red), var(--red-dark));
+    color: #FFF9EE;
+    border: none;
+  }
+
+  .kpis{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 26px;
+  }
+
+  .kpi{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 16px 14px;
+    box-shadow: 0 1px 2px rgba(27,31,43,0.04);
+  }
+  .kpi .label{ font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .kpi .value{ font-family: 'Fraunces', serif; font-size: 26px; font-weight: 500; line-height: 1; }
+  .kpi .delta{ font-size: 12px; margin-top: 8px; display:inline-flex; align-items:center; gap:4px; }
+  .delta.up{ color: var(--olive); }
+  .delta.down{ color: var(--red); }
+  .delta.flat{ color: var(--text-muted); }
+
+  .charts{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 720px){ .charts{ grid-template-columns: 1fr; } }
+
+  .chart-card{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 18px 10px;
+    box-shadow: 0 1px 2px rgba(27,31,43,0.04);
+  }
+  .chart-card h3{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 15px;
+    margin: 0 0 2px;
+  }
+  .chart-card .sub{ font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px; }
+
+  section.panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 2px rgba(27,31,43,0.04);
+  }
+
+  .weekly-callout{
+    background: linear-gradient(180deg, #FBEDEA, #F5DCD8);
+    border: 1px solid rgba(107,20,25,0.25);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .weekly-callout .txt{ font-size: 13.5px; color: #421516; max-width: 560px; }
+  .weekly-callout .txt strong{ color: #0E1D2A; }
+  .weekly-callout button{ white-space: nowrap; }
+  section.panel h2{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 17px;
+    margin: 0 0 14px;
+  }
+
+  .form-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .field label{ display:block; font-size: 11.5px; color: var(--text-muted); margin-bottom: 5px; }
+  .field input{
+    width: 100%;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-size: 13.5px;
+  }
+
+  table{ width:100%; border-collapse: collapse; font-size: 13px; }
+  thead th{
+    text-align:left;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td{
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr:hover{ background: rgba(66,21,22,0.035); }
+  .row-actions button{ padding: 5px 9px; font-size: 12px; }
+  .row-actions{ display:flex; gap:6px; }
+
+  .empty{
+    text-align:center;
+    color: var(--text-muted);
+    padding: 30px 10px;
+    font-size: 13.5px;
+  }
+
+  .subhead{
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin: 22px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  .format-badges{ display:flex; flex-wrap:wrap; gap:8px; }
+  .format-badge{
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .format-badge .n{ color: var(--red); margin-right: 5px; font-family:'Fraunces', serif; }
+
+  .rank-item{
+    display:flex;
+    align-items:center;
+    gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rank-item:last-child{ border-bottom:none; }
+  .rank-pos{
+    font-family:'Fraunces', serif;
+    font-size: 17px;
+    color: var(--red);
+    width: 22px;
+    flex-shrink:0;
+  }
+  .rank-tipo{
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--surface-2);
+    border-radius: 6px;
+    padding: 3px 7px;
+    flex-shrink:0;
+  }
+  .rank-link{ color: var(--red); text-decoration: none; font-size: 13px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rank-link:hover{ text-decoration: underline; }
+  .rank-score{ font-size: 12px; color: var(--text-muted); flex-shrink:0; }
+
+  .hint{ font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .status-msg{ font-size: 12.5px; margin-top: 10px; min-height: 16px; }
+  .status-msg.ok{ color: var(--olive); }
+  .status-msg.err{ color: var(--red); }
+
+  input[type="file"]{ display:none; }
+
+  .star{ }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Painel Mensal — Instagram</h1>
+      <p>Estrada das Cartas · dados salvos automaticamente, mês a mês</p>
+    </div>
+    <div class="top-actions">
+      <select id="yearFilter"></select>
+      <button id="btnExport">Exportar dados</button>
+      <button id="btnImportTrigger">Importar dados</button>
+      <input type="file" id="fileImport" accept="application/json">
+    </div>
+  </header>
+
+  <div class="weekly-callout">
+    <div class="txt">Toda sexta a coleta automática te manda um arquivo. <strong>É só clicar em "Importar dados" e selecionar ele</strong> — os meses anteriores continuam salvos, nada é apagado.</div>
+    <button class="btn-primary" onclick="document.getElementById('fileImport').click()">Importar arquivo de sexta</button>
+  </div>
+
+  <div class="kpis" id="kpiRow"></div>
+
+  <div class="charts">
+    <div class="chart-card">
+      <h3>Evolução de seguidores</h3>
+      <div class="sub" id="followersSub">—</div>
+      <svg id="chartFollowers" viewBox="0 0 480 220" preserveAspectRatio="none" style="width:100%;height:200px;"></svg>
+    </div>
+    <div class="chart-card">
+      <h3>Evolução de engajamento</h3>
+      <div class="sub" id="engagementSub">Interações ÷ Alcance</div>
+      <svg id="chartEngagement" viewBox="0 0 480 220" preserveAspectRatio="none" style="width:100%;height:200px;"></svg>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2 id="formTitle">Registrar mês</h2>
+    <div class="form-grid">
+      <div class="field"><label>Mês</label><input type="month" id="fMes"></div>
+      <div class="field"><label>Publicações</label><input type="number" id="fPublicacoes" min="0"></div>
+      <div class="field"><label>Alcance</label><input type="number" id="fAlcance" min="0"></div>
+      <div class="field"><label>Visualizações</label><input type="number" id="fVisualizacoes" min="0"></div>
+      <div class="field"><label>Interações</label><input type="number" id="fInteracoes" min="0"></div>
+      <div class="field"><label>Compartilhamentos</label><input type="number" id="fCompartilhamentos" min="0"></div>
+      <div class="field"><label>Seguidores (total)</label><input type="number" id="fSeguidores" min="0"></div>
+    </div>
+    <button class="btn-primary" id="btnSalvar">Salvar mês</button>
+    <button id="btnCancelEdit" style="display:none;">Cancelar edição</button>
+    <div class="status-msg" id="statusMsg"></div>
+  </section>
+
+  <section class="panel">
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+      <h2 style="margin:0;">Conteúdos por mês</h2>
+      <select id="contentMonthSelect"></select>
+    </div>
+
+    <div id="contentBreakdown" class="format-badges"></div>
+
+    <h3 class="subhead">Ranking do mês</h3>
+    <div id="contentRanking"></div>
+
+    <h3 class="subhead">Adicionar conteúdo</h3>
+    <div class="form-grid">
+      <div class="field"><label>Formato</label>
+        <select id="cTipo">
+          <option>Reels</option>
+          <option>Carrossel</option>
+          <option>Imagem</option>
+          <option>Story</option>
+        </select>
+      </div>
+      <div class="field"><label>Link</label><input type="url" id="cLink" placeholder="https://instagram.com/..."></div>
+      <div class="field"><label>Comentários</label><input type="number" id="cComentarios" min="0"></div>
+      <div class="field"><label>Compartilhamentos</label><input type="number" id="cCompartilhamentos" min="0"></div>
+      <div class="field"><label>Salvamentos</label><input type="number" id="cSalvamentos" min="0"></div>
+    </div>
+    <button class="btn-primary" id="btnAddConteudo">Adicionar</button>
+    <div class="status-msg" id="contentStatusMsg"></div>
+
+    <h3 class="subhead">Todos os conteúdos do mês</h3>
+    <div id="contentTableWrap"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Histórico</h2>
+    <div id="tableWrap"></div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  const STORAGE_KEY = 'metrics-data';
+  let entries = [];
+  let editingMes = null;
+  let contentMonth = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function monthLabel(mesStr){
+    const [y,m] = mesStr.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    return nomes[parseInt(m,10)-1] + '/' + y.slice(2);
+  }
+
+  function fmt(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    return Number(n).toLocaleString('pt-BR');
+  }
+
+  function pct(n){
+    if(n === null || n === undefined || isNaN(n)) return '—';
+    return n.toFixed(1).replace('.', ',') + '%';
+  }
+
+  function engagementRate(e){
+    if(!e.alcance) return null;
+    return (e.interacoes / e.alcance) * 100;
+  }
+
+  async function load(){
+    try{
+      const res = await window.storage.get(STORAGE_KEY, false);
+      entries = res && res.value ? JSON.parse(res.value) : [];
+    }catch(err){
+      entries = [];
+    }
+    entries.forEach(e => { if(!Array.isArray(e.conteudos)) e.conteudos = []; });
+    entries.sort((a,b) => a.mes.localeCompare(b.mes));
+    if(entries.length) contentMonth = entries[entries.length-1].mes;
+    renderAll();
+  }
+
+  async function persist(){
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(entries), false);
+      return true;
+    }catch(err){
+      showStatus('Não consegui salvar agora. Tenta de novo em instantes.', 'err');
+      return false;
+    }
+  }
+
+  function showStatus(msg, type){
+    const el = $('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg ' + (type||'');
+    if(msg) setTimeout(()=>{ if(el.textContent===msg){ el.textContent=''; el.className='status-msg'; } }, 3500);
+  }
+
+  function populateYearFilter(){
+    const years = Array.from(new Set(entries.map(e => e.mes.split('-')[0]))).sort();
+    const sel = $('yearFilter');
+    const current = sel.value;
+    sel.innerHTML = '<option value="all">Todos os anos</option>' +
+      years.map(y => `<option value="${y}">${y}</option>`).join('');
+    if(years.includes(current)) sel.value = current;
+  }
+
+  function filteredEntries(){
+    const y = $('yearFilter').value;
+    if(!y || y === 'all') return entries;
+    return entries.filter(e => e.mes.startsWith(y));
+  }
+
+  function renderKpis(){
+    const list = filteredEntries();
+    const last = list[list.length-1];
+    const prev = list[list.length-2];
+    const cards = [
+      {label:'Publicações', key:'publicacoes'},
+      {label:'Alcance', key:'alcance'},
+      {label:'Visualizações', key:'visualizacoes'},
+      {label:'Interações', key:'interacoes'},
+      {label:'Compartilhamentos', key:'compartilhamentos'},
+      {label:'Seguidores', key:'seguidores'},
+    ];
+    const row = $('kpiRow');
+    if(!last){
+      row.innerHTML = '<div class="empty" style="grid-column:1/-1;">Ainda não há dados. Registre o primeiro mês abaixo.</div>';
+      return;
+    }
+    row.innerHTML = cards.map(c => {
+      const v = last[c.key];
+      let deltaHtml = '';
+      if(prev && prev[c.key] !== undefined && prev[c.key] !== null){
+        const diff = v - prev[c.key];
+        const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+        const cls = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+        const diffPct = prev[c.key] ? (Math.abs(diff)/prev[c.key]*100) : 0;
+        deltaHtml = `<div class="delta ${cls}">${arrow} ${diffPct.toFixed(0)}% vs mês anterior</div>`;
+      }
+      return `<div class="kpi"><div class="label">${c.label}</div><div class="value">${fmt(v)}</div>${deltaHtml}</div>`;
+    }).join('');
+
+    const conteudosLast = last.conteudos || [];
+    const feedCount = conteudosLast.filter(c => c.tipo !== 'Story').length;
+    const storiesCount = conteudosLast.filter(c => c.tipo === 'Story').length;
+    row.innerHTML += `
+      <div class="kpi"><div class="label">Posts no feed (${monthLabel(last.mes)})</div><div class="value">${fmt(feedCount)}</div></div>
+      <div class="kpi"><div class="label">Stories (${monthLabel(last.mes)})</div><div class="value">${fmt(storiesCount)}</div></div>
+    `;
+  }
+
+  function starPoint(cx, cy, r){
+    // small 4-point sparkle
+    return `M ${cx} ${cy-r} L ${cx+r*0.28} ${cy-r*0.28} L ${cx+r} ${cy} L ${cx+r*0.28} ${cy+r*0.28} L ${cx} ${cy+r} L ${cx-r*0.28} ${cy+r*0.28} L ${cx-r} ${cy} L ${cx-r*0.28} ${cy-r*0.28} Z`;
+  }
+
+  function drawChart(svgId, list, valueFn, color, formatFn){
+    const svg = $(svgId);
+    const W = 480, H = 220, padL = 36, padR = 12, padT = 14, padB = 26;
+    if(list.length === 0){
+      svg.innerHTML = `<text x="${W/2}" y="${H/2}" fill="#8C7A6E" font-size="12" text-anchor="middle" font-family="Inter">Sem dados ainda</text>`;
+      return;
+    }
+    const values = list.map(valueFn).map(v => v === null || v === undefined || isNaN(v) ? 0 : v);
+    const maxV = Math.max(...values, 1);
+    const minV = Math.min(...values, 0);
+    const range = (maxV - minV) || 1;
+    const stepX = list.length > 1 ? (W - padL - padR) / (list.length - 1) : 0;
+
+    const points = values.map((v, i) => {
+      const x = padL + i * stepX;
+      const y = padT + (H - padT - padB) * (1 - (v - minV) / range);
+      return {x, y, v, mes: list[i].mes};
+    });
+
+    let path = '';
+    points.forEach((p, i) => {
+      path += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1) + ' ';
+    });
+
+    let areaPath = path + `L ${points[points.length-1].x.toFixed(1)} ${(H-padB).toFixed(1)} L ${points[0].x.toFixed(1)} ${(H-padB).toFixed(1)} Z`;
+
+    const gridLines = [0,1,2,3].map(i => {
+      const y = padT + (H - padT - padB) * (i/3);
+      return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(66,21,22,0.10)" stroke-width="1"/>`;
+    }).join('');
+
+    const labelEvery = Math.max(1, Math.ceil(points.length / 6));
+    const xLabels = points.map((p,i) => i % labelEvery === 0 || i === points.length-1
+      ? `<text x="${p.x}" y="${H-8}" fill="#8C7A6E" font-size="9.5" text-anchor="middle" font-family="Inter">${monthLabel(p.mes)}</text>` : '').join('');
+
+    const stars = points.map(p => `<path d="${starPoint(p.x, p.y, 5)}" fill="${color}"/>`).join('');
+
+    const maxLabel = `<text x="${padL}" y="${padT-2}" fill="#8C7A6E" font-size="9.5" font-family="Inter">${formatFn(maxV)}</text>`;
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="grad-${svgId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      <path d="${areaPath}" fill="url(#grad-${svgId})" stroke="none"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      ${stars}
+      ${xLabels}
+      ${maxLabel}
+    `;
+  }
+
+  function renderCharts(){
+    const list = filteredEntries();
+    drawChart('chartFollowers', list, e => e.seguidores, '#6B1419', v => fmt(Math.round(v)));
+    drawChart('chartEngagement', list, e => engagementRate(e), '#9F6B24', v => v.toFixed(1)+'%');
+
+    if(list.length >= 2){
+      const first = list[0], last = list[list.length-1];
+      const growth = last.seguidores - first.seguidores;
+      $('followersSub').textContent = `${growth >= 0 ? '+' : ''}${fmt(growth)} desde ${monthLabel(first.mes)}`;
+    } else {
+      $('followersSub').textContent = list.length ? 'Adicione mais meses para ver a evolução' : '—';
+    }
+  }
+
+  function renderTable(){
+    const list = [...filteredEntries()].sort((a,b)=> b.mes.localeCompare(a.mes));
+    const wrap = $('tableWrap');
+    if(list.length === 0){
+      wrap.innerHTML = '<div class="empty">Nenhum mês registrado ainda.</div>';
+      return;
+    }
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Mês</th><th>Publicações</th><th>Alcance</th><th>Visualizações</th>
+          <th>Interações</th><th>Compart.</th><th>Seguidores</th><th>Engaj.</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${list.map(e => `
+            <tr>
+              <td>${monthLabel(e.mes)}</td>
+              <td>${fmt(e.publicacoes)}</td>
+              <td>${fmt(e.alcance)}</td>
+              <td>${fmt(e.visualizacoes)}</td>
+              <td>${fmt(e.interacoes)}</td>
+              <td>${fmt(e.compartilhamentos)}</td>
+              <td>${fmt(e.seguidores)}</td>
+              <td>${pct(engagementRate(e))}</td>
+              <td class="row-actions">
+                <button data-edit="${e.mes}">Editar</button>
+                <button data-del="${e.mes}">Excluir</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    wrap.querySelectorAll('[data-edit]').forEach(btn => {
+      btn.addEventListener('click', () => startEdit(btn.getAttribute('data-edit')));
+    });
+    wrap.querySelectorAll('[data-del]').forEach(btn => {
+      btn.addEventListener('click', () => deleteEntry(btn.getAttribute('data-del')));
+    });
+  }
+
+  function renderAll(){
+    populateYearFilter();
+    renderKpis();
+    renderCharts();
+    renderTable();
+    populateContentMonthSelect();
+    renderContentSection();
+  }
+
+  function startEdit(mes){
+    const e = entries.find(x => x.mes === mes);
+    if(!e) return;
+    editingMes = mes;
+    $('fMes').value = e.mes;
+    $('fPublicacoes').value = e.publicacoes;
+    $('fAlcance').value = e.alcance;
+    $('fVisualizacoes').value = e.visualizacoes;
+    $('fInteracoes').value = e.interacoes;
+    $('fCompartilhamentos').value = e.compartilhamentos;
+    $('fSeguidores').value = e.seguidores;
+    $('formTitle').textContent = 'Editando ' + monthLabel(mes);
+    $('btnCancelEdit').style.display = 'inline-block';
+    $('fMes').scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function cancelEdit(){
+    editingMes = null;
+    ['fMes','fPublicacoes','fAlcance','fVisualizacoes','fInteracoes','fCompartilhamentos','fSeguidores'].forEach(id => $(id).value = '');
+    $('formTitle').textContent = 'Registrar mês';
+    $('btnCancelEdit').style.display = 'none';
+  }
+
+  async function deleteEntry(mes){
+    if(!confirm(`Excluir os dados de ${monthLabel(mes)}? Essa ação não pode ser desfeita.`)) return;
+    entries = entries.filter(e => e.mes !== mes);
+    await persist();
+    if(editingMes === mes) cancelEdit();
+    renderAll();
+    showStatus('Mês excluído.', 'ok');
+  }
+
+  async function saveEntry(){
+    const mes = $('fMes').value;
+    if(!mes){ showStatus('Escolha o mês antes de salvar.', 'err'); return; }
+    const entry = {
+      mes,
+      publicacoes: Number($('fPublicacoes').value) || 0,
+      alcance: Number($('fAlcance').value) || 0,
+      visualizacoes: Number($('fVisualizacoes').value) || 0,
+      interacoes: Number($('fInteracoes').value) || 0,
+      compartilhamentos: Number($('fCompartilhamentos').value) || 0,
+      seguidores: Number($('fSeguidores').value) || 0,
+    };
+    const idx = entries.findIndex(e => e.mes === mes);
+    entry.conteudos = idx >= 0 ? entries[idx].conteudos : [];
+    if(idx >= 0) entries[idx] = entry; else entries.push(entry);
+    entries.sort((a,b) => a.mes.localeCompare(b.mes));
+    if(!contentMonth) contentMonth = mes;
+    const ok = await persist();
+    if(ok){
+      showStatus('Mês salvo.', 'ok');
+      cancelEdit();
+      renderAll();
+    }
+  }
+
+  function exportData(){
+    const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const today = new Date().toISOString().slice(0,10);
+    a.href = url;
+    a.download = `painel-instagram-${today}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showStatus('Arquivo exportado.', 'ok');
+  }
+
+  function importData(file){
+    const reader = new FileReader();
+    reader.onload = async (evt) => {
+      try{
+        const imported = JSON.parse(evt.target.result);
+        if(!Array.isArray(imported)) throw new Error('formato inválido');
+        const byMes = {};
+        entries.forEach(e => byMes[e.mes] = e);
+        imported.forEach(e => {
+          if(!e || !e.mes) return;
+          const existing = byMes[e.mes];
+          const incomingConteudos = Array.isArray(e.conteudos) ? e.conteudos : [];
+          const existingConteudos = (existing && Array.isArray(existing.conteudos)) ? existing.conteudos : [];
+          const seen = new Map();
+          existingConteudos.forEach(c => seen.set((c.link || c.id || '').trim().toLowerCase() || c.id, c));
+          incomingConteudos.forEach(c => {
+            const key = (c.link || c.id || '').trim().toLowerCase() || c.id || Math.random().toString(36);
+            seen.set(key, c);
+          });
+          e.conteudos = Array.from(seen.values());
+          byMes[e.mes] = e;
+        });
+        entries = Object.values(byMes).sort((a,b) => a.mes.localeCompare(b.mes));
+        const ok = await persist();
+        if(ok){ showStatus('Dados importados com sucesso.', 'ok'); renderAll(); }
+      }catch(err){
+        showStatus('Não consegui ler esse arquivo. Confere se é um export daqui mesmo.', 'err');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  function currentMonthKey(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  }
+
+  function populateContentMonthSelect(){
+    const sel = $('contentMonthSelect');
+    const monthsSet = new Set(entries.map(e => e.mes));
+    monthsSet.add(currentMonthKey());
+    const sorted = Array.from(monthsSet).sort().reverse();
+    if(!contentMonth || !monthsSet.has(contentMonth)) contentMonth = sorted[0];
+    sel.innerHTML = sorted.map(m => `<option value="${m}" ${m===contentMonth?'selected':''}>${monthLabel(m)}</option>`).join('');
+  }
+
+  function scoreOf(c){
+    return (Number(c.comentarios)||0) + (Number(c.compartilhamentos)||0) + (Number(c.salvamentos)||0);
+  }
+
+  function renderContentSection(){
+    const entry = entries.find(e => e.mes === contentMonth);
+    const list = entry ? entry.conteudos : [];
+
+    const tipos = ['Reels','Carrossel','Imagem','Story'];
+    const counts = {};
+    tipos.forEach(t => counts[t] = list.filter(c => c.tipo === t).length);
+    $('contentBreakdown').innerHTML = tipos.map(t =>
+      `<span class="format-badge"><span class="n">${counts[t]}</span>${t}${t!=='Story' && counts[t]!==1 ? 's' : ''}</span>`
+    ).join('') || '<span class="format-badge">Sem conteúdos ainda</span>';
+
+    const ranked = [...list].filter(c => c.tipo !== 'Story').sort((a,b) => scoreOf(b) - scoreOf(a)).slice(0,5);
+    $('contentRanking').innerHTML = ranked.length ? ranked.map((c,i) => `
+      <div class="rank-item">
+        <div class="rank-pos">${i+1}</div>
+        <div class="rank-tipo">${c.tipo}</div>
+        ${c.link ? `<a class="rank-link" href="${c.link}" target="_blank" rel="noopener">${c.link}</a>` : '<span class="rank-link" style="color:var(--text-muted);">sem link</span>'}
+        <div class="rank-score">${scoreOf(c)} pts</div>
+      </div>
+    `).join('') : '<div class="empty">Adicione conteúdos deste mês para ver o ranking.</div>';
+
+    const wrap = $('contentTableWrap');
+    if(list.length === 0){
+      wrap.innerHTML = '<div class="empty">Nenhum conteúdo registrado para este mês.</div>';
+      return;
+    }
+    wrap.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Formato</th><th>Link</th><th>Coment.</th><th>Compart.</th><th>Salvam.</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${list.map(c => `
+            <tr>
+              <td>${c.tipo}</td>
+              <td style="max-width:220px; overflow:hidden; text-overflow:ellipsis;">${c.link ? `<a class="rank-link" href="${c.link}" target="_blank" rel="noopener">${c.link}</a>` : '—'}</td>
+              <td>${fmt(c.comentarios)}</td>
+              <td>${fmt(c.compartilhamentos)}</td>
+              <td>${fmt(c.salvamentos)}</td>
+              <td class="row-actions"><button data-delc="${c.id}">Excluir</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    wrap.querySelectorAll('[data-delc]').forEach(btn => {
+      btn.addEventListener('click', () => deleteContent(btn.getAttribute('data-delc')));
+    });
+  }
+
+  async function addContent(){
+    if(!contentMonth) return;
+    let entry = entries.find(e => e.mes === contentMonth);
+    if(!entry){
+      entry = { mes: contentMonth, publicacoes:0, alcance:0, visualizacoes:0, interacoes:0, compartilhamentos:0, seguidores:0, conteudos:[] };
+      entries.push(entry);
+      entries.sort((a,b) => a.mes.localeCompare(b.mes));
+    }
+    const item = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      tipo: $('cTipo').value,
+      link: $('cLink').value.trim(),
+      comentarios: Number($('cComentarios').value) || 0,
+      compartilhamentos: Number($('cCompartilhamentos').value) || 0,
+      salvamentos: Number($('cSalvamentos').value) || 0,
+    };
+    entry.conteudos.push(item);
+    const ok = await persist();
+    if(ok){
+      ['cLink','cComentarios','cCompartilhamentos','cSalvamentos'].forEach(id => $(id).value = '');
+      const el = $('contentStatusMsg');
+      el.textContent = 'Conteúdo adicionado.';
+      el.className = 'status-msg ok';
+      setTimeout(() => { el.textContent=''; el.className='status-msg'; }, 3000);
+      renderContentSection();
+    }
+  }
+
+  async function deleteContent(id){
+    const entry = entries.find(e => e.mes === contentMonth);
+    if(!entry) return;
+    entry.conteudos = entry.conteudos.filter(c => c.id !== id);
+    await persist();
+    renderContentSection();
+  }
+
+  $('contentMonthSelect').addEventListener('change', (e) => { contentMonth = e.target.value; renderContentSection(); });
+  $('btnAddConteudo').addEventListener('click', addContent);
+
+  $('btnSalvar').addEventListener('click', saveEntry);
+  $('btnCancelEdit').addEventListener('click', cancelEdit);
+  $('btnExport').addEventListener('click', exportData);
+  $('btnImportTrigger').addEventListener('click', () => $('fileImport').click());
+  $('fileImport').addEventListener('change', (e) => {
+    if(e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = '';
+  });
+  $('yearFilter').addEventListener('change', renderAll);
+
+  load();
+})();
+</script>
+</body>
+</html>
